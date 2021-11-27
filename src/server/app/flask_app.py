@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from . import db
+from . import topics
 
 
 def DoDbSetup(app):
@@ -30,15 +31,18 @@ def create_app(test_config=None):
     # Take care of DB related setup items.
     DoDbSetup(app)
 
-    # ensure the instance folder exists
+    # Ensure the instance folder exists.
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
 
-    # a simple page that says hello
+    # A simple page that says hello.
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
+
+    # Register any additional pages.
+    app.register_blueprint(topics.bp)
 
     return app
