@@ -20,31 +20,30 @@
 
     const listen_for_corpus_data = event => {
       const corpusDiv = document.getElementById('corpus_div');
-      for (child in corpusDiv.childNodes()) {
-        if (child.tagName() == 'p') {
+      for (child in corpusDiv.childNodes) {
+        if (child.tagName == 'p') {
           child.remove()
         }
       }
-      $.getJSON('{{ url_for('topics.background_fetch_corpus_data') }}',
-            function(data) {
+      $.getJSON("{{ url_for('topics.background_fetch_corpus_data', n_docs=20) }}",
+            function(response_data) {
           //do nothing
-        for (doc in response) {
+        console.log(`response data ${response_data}`)
+        console.log(`response data ${response_data[0]}`)
+        $.each(response_data, function(index, doc){
           console.log("Successfully requested JSON data")
+          console.log(`response data ${doc}`)
           const p = document.createElement('p');
-          p.innerText = `Name: ${doc.name}\nSteps:${doc.steps}\n` +
-                        `Description:${doc.description}\nIngredients:${doc.ingredients}\n`
-                        `Tags:${doc.tags}`
+          p.innerHTML = `</br><strong>Name:</strong> ${doc.document_name}\n` +
+                        `</br><strong>Steps:</strong>${doc.steps}\n` +
+                        `</br><strong>Description:</strong>${doc.description}\n` +
+                        `</br><strong>Ingredients:</strong>${doc.ingredients}\n` +
+                        `</br><strong>Tags:</strong>${doc.tags}`
           corpusDiv.appendChild(p)
-        }
+        });
       }).fail(function() {
         console.log("Failed to get JSON data from /background_fetch_corpus_data.");
       });
-      //for (json row in response) {
-      const p = document.createElement('p');
-      p.innerText = "Displaying corpus data.";
-      corpusDiv.appendChild(p)
-      // }
-      // document.querySelector('#container').appendChild(p);
     };
   </script>
   {#
@@ -64,7 +63,7 @@
   <h2>Corpus Sample</h2>
   <div id="corpus_div">
     <button type="button" onclick="alert('Hello world!')">Click Me!</button>
-    <button onclick="listen_for_corpus_data()" id="button">Click to display corpus data</button>
+    <button onclick="listen_for_corpus_data()" id="button">Display random corpus data</button>
   </div>
   {% for n in range(10) %}
     {#

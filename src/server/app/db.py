@@ -72,7 +72,7 @@ def read_all_doc_text_to_dataframe():
 
 def read_random_doc_text_to_dataframe(nrows=10):
     db = get_db()
-    df = pd.read_sql(sql_strings._SELECT_RANDOM_TEXT_DATA, db, index_col=None)
+    df = pd.read_sql(sql_strings._SELECT_RANDOM_TEXT_DATA, db, params=[nrows], index_col=None)
     print("read_random_doc_text_to_dataframe columns {}\n{}".format(
         df.columns, df))
     return df

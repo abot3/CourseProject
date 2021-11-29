@@ -3,6 +3,7 @@ import functools
 from flask import (Blueprint, flash, g, redirect, render_template, request,
                    session, url_for)
 from flask import current_app as app
+from flask.json import jsonify
 from . import db
 from . import modelling
 
@@ -92,10 +93,12 @@ def corpus_main():
 
 @bp.route('/topic/background_fetch_corpus_data', methods=('GET',))
 def background_fetch_corpus_data():
-    df = db.read_random_doc_text_to_dataframe(nrows=20)
+    n_docs = request.args.get("n_docs", default=20)
+    print(f"requesting {n_docs} docs")
+    df = db.read_random_doc_text_to_dataframe(nrows=n_docs)
     # df["all_text"] = (df["document_name"] + df["description"] + df["steps"] +
     #                   df["ingredients"] + df["tags"])
-    text_df = df["document_name", "description", "steps", "ingredients", "tags"]
+    text_df = df[["document_name", "description", "steps", "ingredients", "tags"]]
     print("background_fetch_corpus_data text df {}".format(text_df))
     return jsonify(text_df.to_dict('records'))
 

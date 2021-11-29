@@ -111,5 +111,5 @@ _SELECT_RANDOM_TEXT_DATA = '''
   FROM corpus
   INNER JOIN models ON corpus.id=models.doc_id
   ORDER BY RANDOM()
-  LIMIT 10;
+  LIMIT ?;
 '''
