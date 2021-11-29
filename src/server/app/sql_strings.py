@@ -134,6 +134,8 @@ _SELECT_ALL_CUISINE_TEXT_DATA = '''
       OR (tags.tag LIKE "%israel%") OR (tags.tag LIKE "%middle-e%")
       OR (tags.tag LIKE "%india%") OR (tags.tag LIKE "%halal%")
       OR (tags.tag LIKE "%arab%") OR (tags.tag LIKE "%egyptian%")
+      OR (tags.tag LIKE "%japan%") OR (tags.tag LIKE "%german%")
+      --OR (tags.tag LIKE "%american%")
     )
     SELECT doc_tags.doc_id
     FROM doc_tags

@@ -1,10 +1,13 @@
 import os
+import pickle
 from typing import Optional, List, Tuple
+from datetime import datetime
 
 import pandas as pd
 from gensim.models.ldamulticore import LdaMulticore
 from gensim.parsing import preprocessing
 from gensim.corpora import Dictionary
+from flask import g
 # from nltk.stem.wordnet import WordNetLemmatizer
 from gensim.parsing.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
@@ -15,6 +18,8 @@ logging.basicConfig(filename='gensim.log',
 
 
 _MODEL_NAME = "lda_model.model"
+_DICTIONARY_NAME = "dictionary.corpus"
+_CORPUS_NAME = "corpus.corpus"
 _NUM_TOPICS = 30
 _NUM_WORKDERS = 3
 _NUM_PASSES = 10
@@ -45,6 +50,52 @@ def try_save_model(instance_path: str, model: LdaMulticore):
     if not os.path.exists(instance_path):
         raise IOError(f"Could not locate path {instance_path}")
     model.save(path)
+
+
+def try_get_saved_dictionary(instance_path: str) -> Optional[Dictionary]:
+    model = None
+    path = os.path.join(instance_path, _DICTIONARY_NAME)
+    if not os.path.exists(path):
+        raise IOError(f"Could not locate path {path}")
+    try:
+        dictionary = Dictionary.load(path)
+    except Exception as e:
+        pass
+    return dictionary 
+
+
+def try_save_dictionary(instance_path: str, dictionary: Dictionary):
+    path = os.path.join(instance_path, _DICTIONARY_NAME)
+    print("saving dictionary to {}".format(path))
+    if not dictionary:
+        raise ValueError("Cannot save null dictionary")
+    if not os.path.exists(instance_path):
+        raise IOError(f"Could not locate path {instance_path}")
+    dictionary.save(path)
+
+
+def try_get_saved_corpus(instance_path: str) -> Optional[List[Tuple[int, int]]]:
+    corpus = None
+    path = os.path.join(instance_path, _CORPUS_NAME)
+    if not os.path.exists(path):
+        raise IOError(f"Could not locate path {path}")
+    try:
+        with open(path, 'rb') as input:
+            corpus = pickle.load(input)
+    except Exception as e:
+        pass
+    return corpus 
+
+
+def try_save_corpus(instance_path: str, corpus: List[Tuple[int, int]]):
+    path = os.path.join(instance_path, _CORPUS_NAME)
+    print("saving corpus to {}".format(path))
+    if not corpus:
+        raise ValueError("Cannot save null corpus")
+    if not os.path.exists(instance_path):
+        raise IOError(f"Could not locate path {instance_path}")
+    with open(path, 'wb') as out:
+        pickle.dump(corpus, out)
 
 
 def build_gensim_corpus(
@@ -94,10 +145,27 @@ def build_gensim_corpus(
     return (corpus, dictionary)
 
 
-def compute_lda_model(df: pd.DataFrame):
+def print_time():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Current Time =", current_time)
+
+
+def compute_lda_model(df: pd.DataFrame, instance_path: str):
+    print("Building corpus")
+    print_time()
     corpus, dictionary = build_gensim_corpus(df)
     # https://stackoverflow.com/questions/67229373/gensim-lda-error-cannot-compute-lda-over-an-empty-collection-no-terms
+    print_time()
     temp = dictionary[0]  # This is only to "load" the dictionary.
+    print_time()
+    try_save_dictionary(instance_path, dictionary)
+    print_time()
+    try_save_corpus(instance_path, corpus)
+    print("finished saving")
+    print_time()
+    g.dictionary = dictionary
+    g.corpus = corpus
     model = LdaMulticore(corpus,
                         workers=_NUM_WORKDERS,
                          id2word=dictionary.id2token,
@@ -106,16 +174,28 @@ def compute_lda_model(df: pd.DataFrame):
                          passes=_NUM_PASSES,
                          iterations=_NUM_ITERATIONS,
                          eval_every=_EVAL_EVERY)
+    print_time()
     return model
 
 
 def set_topic_model_corpus_fraction(fraction):
     global _DF_ROW_FRACTION
     _DF_ROW_FRACTION = fraction
-    
+
 
 def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
     model = None
+    try:
+        dictionary = try_get_saved_dictionary(instance_path)
+        corpus = try_get_saved_corpus(instance_path)
+        if dictionary.get("chines") != None:
+            # print(f"Found chines in {dictionary.id2token["chines"]}")
+            print("Found chines in {}".format(dictionary.get("chines")))
+        g.dictionary = dictionary
+        g.corpus = corpus
+    except IOError as e:
+        pass
+
     try:
         model = try_get_saved_model(instance_path)
         print("Model topics {}".format(model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
@@ -123,7 +203,7 @@ def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
     except IOError as e:
         pass
 
-    model = compute_lda_model(df)
+    model = compute_lda_model(df, instance_path)
     print("Model topics {}".format(model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
     try_save_model(instance_path, model)
     return model

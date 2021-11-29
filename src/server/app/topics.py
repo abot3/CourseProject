@@ -1,4 +1,5 @@
 import functools
+import itertools
 
 from flask import (Blueprint, flash, g, redirect, render_template, request,
                    session, url_for)
@@ -15,6 +16,9 @@ def read_text():
     df = db.read_all_cuisine_doc_text_to_dataframe()
     modelling.set_topic_model_corpus_fraction(1.0)
     return df
+
+def yield_first_n(iterable):
+    return [x for x in itertools.islice(iterable,20)]
 
 @bp.route('/topic/topic_main', methods=('GET', 'POST'))
 def topics_all():
@@ -50,6 +54,19 @@ def topics_all():
     topic_model = modelling.run_topic_model(df, app.instance_path)
     print("Successfully ran topic model!")
     print("topic_model {}".format(topic_model))
+    if g.dictionary:
+        # Potentially use eta: https://towardsdatascience.com/evaluate-topic-model-in-python-latent-dirichlet-allocation-lda-7d57484bb5d0.
+        # keys is - list of integers
+        # values is ValuesView? 
+        # Token2id keys are words.
+        print("Dictionary keys l:{} {}\n Dictionary values l:{} {}\n".format(
+            len(g.dictionary.keys()), yield_first_n(g.dictionary.keys()),
+            len(g.dictionary.values()), yield_first_n(g.dictionary.values())))
+        print("Dictionary token2id l:{} {}".format(
+            len(g.dictionary.token2id), yield_first_n(g.dictionary.token2id)))
+        print("Dictionary token2id keys {}".format(yield_first_n(g.dictionary.token2id.keys())))
+    # if g.corpus:
+    #     print("Top topics {}".format(topic_model.top_topics(corpus=g.corpus)))
 
     return render_template('topic/topic_main.html', df=df, topic_model=topic_model,
         topics=topic_model.print_topics(num_topics=modelling._NUM_TOPICS, num_words=20))
