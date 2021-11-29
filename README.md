@@ -10,8 +10,12 @@ Please fork this repository and paste the github link of your fork on Microsoft 
 export FLASK_APP=app/flask_app.py
 export FLASK\_ENV=development
 cd src/server
+flask routes
 flask init-db
 flask run --eager-loading
 
 # Project Layout
 
+
+# Formatting
+yapf --in-place --recursive app/*.py *.py test/*.py

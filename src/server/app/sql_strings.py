@@ -20,7 +20,7 @@
 #   description TEXT,
 #   ingredients TEXT,
 #   n_ingredients INTEGER,
-#   # model_type VARCHAR 
+#   # model_type VARCHAR
 #   # author_id INTEGER NOT NULL,
 #   # created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 #   # title TEXT NOT NULL,
@@ -29,7 +29,7 @@
 #   FOREIGN KEY (doc_id) REFERENCES corpus (id)
 # );
 
-# INSERT INTO corpus() 
+# INSERT INTO corpus()
 # VALUES ()
 
 # RAW Recipes DF
@@ -58,7 +58,6 @@ _INSERT_RAW_RECIPES_TAGS = '''
 #   VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)
 # '''
 
-
 _INSERT_RAW_RECIPES_MODELS = '''
   INSERT INTO models (id, doc_id, third_party_id, tags, contributor_id, steps,
     description, ingredients, n_ingredients)
@@ -67,9 +66,8 @@ _INSERT_RAW_RECIPES_MODELS = '''
     ?, ?, ?, ?, ?, ?, ?)
 '''
 
-
 # Note sqlite has no concat operator
-# JOIN tags ON models.tags LIKE CONCAT(\'%\', CONCAT(tags.tag, \'%\')) 
+# JOIN tags ON models.tags LIKE CONCAT(\'%\', CONCAT(tags.tag, \'%\'))
 _INSERT_DOC_TAGS = '''
   INSERT INTO doc_tags (tag, tag_id, doc_id, third_party_id)
   WITH docs_by_tag AS (
@@ -85,10 +83,6 @@ _INSERT_DOC_TAGS = '''
   SELECT *
   FROM docs_by_tag
 '''
-
-
-
-
 
 #################################################################
 # Query Strings
@@ -106,3 +100,16 @@ _SELECT_ALL_TEXT_DATA = '''
   INNER JOIN models ON corpus.id=models.doc_id
 '''
 
+_SELECT_RANDOM_TEXT_DATA = '''
+  SELECT 
+    corpus.document_name,
+    models.description,
+    models.tags,
+    models.steps,
+    models.ingredients,
+    models.third_party_id
+  FROM corpus
+  INNER JOIN models ON corpus.id=models.doc_id
+  ORDER BY RANDOM()
+  LIMIT 10;
+'''

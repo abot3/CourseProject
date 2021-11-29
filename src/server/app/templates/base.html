@@ -1,26 +1,36 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Topics</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<nav>
-  <h1>Base</h1>
-  <ul>
-<!--     {% if g.user %}
-      <li><span>{{ g.user['username'] }}</span>
-      <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-    {% else %}
-      <li><a href="{{ url_for('auth.register') }}">Register</a>
-      <li><a href="{{ url_for('auth.login') }}">Log In</a>
-    {% endif %}
-   -->
-    <li><p>Hello world from base template.</p>>
-  </ul>
-</nav>
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block content %}{% endblock %}
-</section>
+{# https://realpython.com/primer-on-jinja-templating/ #}
+<html>
+  <head>
+    <title>{% block title %}{% endblock %} - Topics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <nav>
+      <h1>Flask Topic Models</h1>
+      <ul>
+        <li><a href="{{ url_for('topics.topics_all') }}">View Topics</a>
+        <li><a href="{{ url_for('topics.corpus_main') }}">View Corpus</a>
+      {# This is a comment now.
+        {% if g.user %}
+          <li><span>{{ g.user['username'] }}</span>
+          <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+
+        {% else %}
+          <li><a href="{{ url_for('auth.register') }}">Register</a>
+          <li><a href="{{ url_for('auth.login') }}">Log In</a>
+
+        {% endif %}
+      #}
+        <li><a href="{{ url_for('hello') }}">Index</a>
+      </ul>
+    </nav>
+  </head>
+  <section class="content">
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </section>
+  </html>

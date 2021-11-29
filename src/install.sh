@@ -12,6 +12,7 @@ if [ 0 ]; then
   pip install transformers
   pip install spacy 
   pip install ftfy
+  pip install nltk 
 else
   conda install flask
   conda install gensim
@@ -22,8 +23,9 @@ else
   conda install tensorflow
   conda install torch
   conda install transformers
-  pip install spacy 
-  pip install ftfy
+  conda install spacy 
+  conda install ftfy
+  conda install nltk
 fi
 export FLASK_APP=app/flask_app.py
 export FLASK_ENV=development
