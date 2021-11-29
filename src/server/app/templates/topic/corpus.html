@@ -22,7 +22,7 @@
       const corpusDiv = document.getElementById('corpus_div');
       for (child in corpusDiv.childNodes) {
         if (child.tagName == 'p') {
-          child.remove()
+          corpusDiv.removeChild(child)
         }
       }
       $.getJSON("{{ url_for('topics.background_fetch_corpus_data', n_docs=20) }}",
@@ -30,6 +30,7 @@
           //do nothing
         console.log(`response data ${response_data}`)
         console.log(`response data ${response_data[0]}`)
+        corpusDiv.rem
         $.each(response_data, function(index, doc){
           console.log("Successfully requested JSON data")
           console.log(`response data ${doc}`)

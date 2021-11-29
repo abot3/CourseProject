@@ -40,7 +40,6 @@ def topics_all():
         #         error = f"User {username} is already registered."
         #     else:
         #         return redirect(url_for("auth.login"))
-
         flash(error)
 
     df = read_text() 
@@ -52,7 +51,8 @@ def topics_all():
     print("Successfully ran topic model!")
     print("topic_model {}".format(topic_model))
 
-    return render_template('topic/topic_main.html', df=df, topic_model=topic_model)
+    return render_template('topic/topic_main.html', df=df, topic_model=topic_model,
+        topics=topic_model.print_topics(num_topics=modelling._NUM_TOPICS, num_words=20))
 
 
 @bp.route('/topic/corpus', methods=('GET', 'POST'))

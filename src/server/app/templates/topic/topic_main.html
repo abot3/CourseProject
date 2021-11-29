@@ -15,13 +15,14 @@
     </form>
   #}
 
-  <p>Hello from topic_main template</p>
-  {% for n in range(10) %}
+  <p>Top {{topic_model.get_topics().shape[0]}} Topics</p>
+  {% for row in topics %}
     {#
       {% for line in check[n][2:] %}
         <p> {{ beta[0][0] }} </p>
       {% endfor %}
     #}
-    <p>item {{n}} from dataframe</p>
+    <p><strong>Topic:</strong> {{row[0]}}</br>
+       <strong>Words:</strong> {{row[1]}}</p>
   {% endfor %}
 {% endblock %}
