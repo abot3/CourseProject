@@ -65,12 +65,4 @@
     <button type="button" onclick="alert('Hello world!')">Click Me!</button>
     <button onclick="listen_for_corpus_data()" id="button">Display random corpus data</button>
   </div>
-  {% for n in range(10) %}
-    {#
-      {% for line in check[n][2:] %}
-        <p> {{ beta[0][0] }} </p>
-      {% endfor %}
-    #}
-    <p>item {{n}} from dataframe</p>
-  {% endfor %}
 {% endblock %}

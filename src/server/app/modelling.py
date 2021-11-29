@@ -8,12 +8,21 @@ from gensim.corpora import Dictionary
 # from nltk.stem.wordnet import WordNetLemmatizer
 from gensim.parsing.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
+import logging
+logging.basicConfig(filename='gensim.log',
+                    format="%(asctime)s:%(levelname)s:%(message)s",
+                    level=logging.INFO)
+
 
 _MODEL_NAME = "lda_model.model"
-_NUM_TOPICS = 20
-_NUM_WORKDERS = 4
-_DOC_CHUNKSIZE = 500
-_DF_ROW_FRACTION = 0.05
+_NUM_TOPICS = 30
+_NUM_WORKDERS = 3
+_NUM_PASSES = 10
+_NUM_ITERATIONS = 100
+_EVAL_EVERY = 1
+_DOC_CHUNKSIZE = 2000
+#_DF_ROW_FRACTION = 1.0 
+_DF_ROW_FRACTION = 1.0 
 
 
 def try_get_saved_model(instance_path: str) -> Optional[LdaMulticore]:
@@ -74,7 +83,7 @@ def build_gensim_corpus(
     dictionary = Dictionary(docs)
     print("docs\n{}".format(docs[1:20]))
     # Filter out words that occur less than 20 documents, or more than 50% of the documents.
-    dictionary.filter_extremes(no_below=2, no_above=0.2)
+    dictionary.filter_extremes(no_below=0, no_above=0.4)
 
     # Bag-of-words representation of the documents.
     # Convert document into the bag-of-words (BoW) format
@@ -90,12 +99,20 @@ def compute_lda_model(df: pd.DataFrame):
     # https://stackoverflow.com/questions/67229373/gensim-lda-error-cannot-compute-lda-over-an-empty-collection-no-terms
     temp = dictionary[0]  # This is only to "load" the dictionary.
     model = LdaMulticore(corpus,
+                        workers=_NUM_WORKDERS,
                          id2word=dictionary.id2token,
                          eta='auto',
                          num_topics=_NUM_TOPICS,
-                         eval_every=None)
+                         passes=_NUM_PASSES,
+                         iterations=_NUM_ITERATIONS,
+                         eval_every=_EVAL_EVERY)
     return model
 
+
+def set_topic_model_corpus_fraction(fraction):
+    global _DF_ROW_FRACTION
+    _DF_ROW_FRACTION = fraction
+    
 
 def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
     model = None
