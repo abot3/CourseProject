@@ -8,6 +8,7 @@ from flask.json import jsonify
 from . import db
 from . import modelling
 
+
 bp = Blueprint('topics', __name__, url_prefix='/')
 
 def read_text():

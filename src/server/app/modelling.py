@@ -4,6 +4,7 @@ from typing import Optional, List, Tuple
 from datetime import datetime
 
 import pandas as pd
+import numpy as np
 from gensim.models.ldamulticore import LdaMulticore
 from gensim.parsing import preprocessing
 from gensim.corpora import Dictionary
@@ -26,8 +27,26 @@ _NUM_PASSES = 10
 _NUM_ITERATIONS = 100
 _EVAL_EVERY = 1
 _DOC_CHUNKSIZE = 2000
-#_DF_ROW_FRACTION = 1.0 
-_DF_ROW_FRACTION = 1.0 
+_DF_ROW_FRACTION = 1.0
+_PROR_PROBABILITY = 0.2  #reserve 20% probability for our priors
+
+
+
+_CULTURES = [
+    "chines", "korea", "korean",
+    "viet", "vietnames", "vietnam", "singapore",
+    "singaporean",
+    "italy", "italian", "italyi",
+    "european", "french",
+    "france", "british",
+    "britain", "mediterranean",
+    "africa", "african", "kenya", "kenyan"
+    "israel", "israeli", "middle-east", "middleeast",
+    "india", "halal",
+    "arab", "arabian", "egyptian", "egypt",
+    "japan", "japanese", "german",
+    "american", "america",
+]
 
 
 def try_get_saved_model(instance_path: str) -> Optional[LdaMulticore]:
@@ -150,6 +169,32 @@ def print_time():
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
 
+def create_eta():
+    global _CULTURES
+    dictionary = g.dictionary
+    corpus = g.corpus
+    culture_match_ids = list()
+    all_tokens = dictionary.token2id.keys()
+    # all_tokens.sort() 
+    print("Dictionary is {}".format(g.dictionary))
+    print("Dictionary repr is {}".format(repr(g.dictionary)))
+    print("Dictionary token2id is {}".format(repr(g.dictionary.token2id)))
+    print("korea in Dictionary token2id is {}".format(g.dictionary.token2id["korea"]))
+    for culture in _CULTURES:
+        print("Searching for {}, in {}".format(culture, dictionary.token2id.get(culture, "<blank>")))
+        if culture in dictionary.token2id:
+            print(f"Found culture {culture} in tokens")
+            culture_match_ids.append((culture, dictionary.token2id[culture]))
+    n_tokens = len(all_tokens)
+    n_culture_tokens = len(culture_match_ids)
+    n_normal_tokens = n_tokens - n_culture_tokens
+    print(f"{n_tokens}, {n_culture_tokens}, {n_normal_tokens}")
+    per_token_probability = (1.0 - _PROR_PROBABILITY) / n_normal_tokens
+    culture_token_probability = (_PROR_PROBABILITY) / n_culture_tokens
+    eta = list(np.full(n_tokens, per_token_probability))
+    for culture in culture_match_ids:
+        eta[culture[1]] = culture_token_probability
+    return eta
 
 def compute_lda_model(df: pd.DataFrame, instance_path: str):
     print("Building corpus")
@@ -166,10 +211,12 @@ def compute_lda_model(df: pd.DataFrame, instance_path: str):
     print_time()
     g.dictionary = dictionary
     g.corpus = corpus
+    eta = create_eta()
     model = LdaMulticore(corpus,
                         workers=_NUM_WORKDERS,
                          id2word=dictionary.id2token,
-                         eta='auto',
+                         # eta='auto',
+                         eta=eta,
                          num_topics=_NUM_TOPICS,
                          passes=_NUM_PASSES,
                          iterations=_NUM_ITERATIONS,

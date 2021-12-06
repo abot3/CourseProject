@@ -130,9 +130,9 @@ def insert_data_into_db(pp_recipes_df, raw_recipes_df):
     tags = raw_recipes_df["tags"].str.split(',')
     tags = tags.explode().str.strip('[]" \'\'.,')
     tags.drop_duplicates(keep="first", inplace=True)
-    print("type {} shape:{} tags as numpy\n {}".format(type(tags.to_numpy()),
-                                                       tags.to_numpy().shape,
-                                                       tags.to_numpy()))
+    # print("type {} shape:{} tags as numpy\n {}".format(type(tags.to_numpy()),
+    #                                                    tags.to_numpy().shape,
+    #                                                    tags.to_numpy()))
     # print("to be inserted {}".format([(x,) for x in tags.to_numpy(dtype=str).tolist()]))
     cur.executemany(sql_strings._INSERT_RAW_RECIPES_TAGS,
                     [(x, ) for x in tags.to_numpy(dtype=str).tolist()])
