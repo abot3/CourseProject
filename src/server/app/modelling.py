@@ -220,9 +220,9 @@ def compute_lda_model(df: pd.DataFrame, instance_path: str):
     return model
 
 
-def set_topic_model_corpus_fraction(fraction):
-    global _DF_ROW_FRACTION
-    _DF_ROW_FRACTION = fraction
+# def set_topic_model_corpus_fraction(fraction):
+#     global _DF_ROW_FRACTION
+#     _DF_ROW_FRACTION = fraction
 
 
 def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:

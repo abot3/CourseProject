@@ -9,11 +9,11 @@
   <script type=text/javascript>
     const listen_for_corpus_data = event => {
       const corpusDiv = document.getElementById('corpus_div');
-      for (child in corpusDiv.childNodes) {
-        if (child.tagName == 'p') {
-          corpusDiv.removeChild(child)
+      Array.prototype.forEach.call (corpusDiv.childNodes, function (child) {
+        if (child.nodeName == 'P') {
+          child.parentNode.removeChild(child)
         }
-      }
+      });
       $.getJSON("{{ url_for('topics.background_fetch_corpus_data', n_docs=20) }}",
             function(response_data) {
           //do nothing

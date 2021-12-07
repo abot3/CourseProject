@@ -11,11 +11,11 @@ from . import modelling
 
 bp = Blueprint('topics', __name__, url_prefix='/')
 
-def read_text():
+def read_text(limit=-1):
     # df = db.read_all_doc_text_to_dataframe()
     # modelling.set_topic_model_corpus_fraction(.10)
-    df = db.read_all_cuisine_doc_text_to_dataframe()
-    modelling.set_topic_model_corpus_fraction(1.0)
+    df = db.read_all_cuisine_doc_text_to_dataframe(limit)
+    # modelling.set_topic_model_corpus_fraction(1.0)
     return df
 
 def yield_first_n(iterable):
@@ -57,7 +57,7 @@ def corpus_main():
         error = "Post not implemented for /corpus"
         flash(error)
 
-    df = read_text() 
+    df = read_text(limit=1000) 
     df["all_text"] = (df["document_name"] + df["description"] + df["steps"] +
                       df["tags"])
                       # df["ingredients"])

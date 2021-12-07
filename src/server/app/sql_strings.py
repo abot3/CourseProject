@@ -147,6 +147,8 @@ _SELECT_ALL_CUISINE_TEXT_DATA = '''
   FROM corpus
   INNER JOIN relevant_docs ON corpus.id=relevant_docs.doc_id
   INNER JOIN models ON corpus.id=models.doc_id
+  ORDER BY RANDOM()
+  LIMIT ?;
 '''
 
 _SELECT_RANDOM_TEXT_DATA = '''

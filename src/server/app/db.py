@@ -70,9 +70,10 @@ def read_all_doc_text_to_dataframe():
     return df
 
 
-def read_all_cuisine_doc_text_to_dataframe():
+# Limit -1 fetches all rows.
+def read_all_cuisine_doc_text_to_dataframe(limit=-1):
   db = get_db()
-  df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, index_col=None)
+  df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, params=[limit], index_col=None)
   print("read_all_cuisine_doc_text_to_dataframe columns {}\n{}".format(
       df.columns, df))
   return df

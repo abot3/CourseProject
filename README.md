@@ -4,9 +4,9 @@ Please fork this repository and paste the github link of your fork on Microsoft 
 
 # Overview
 
+
 # Installation
 ```
-c
 cd src
 chmod +x install.sh
 Then either:
@@ -23,7 +23,15 @@ cd server
 flask routes
 flask run --eager-loading  
 flask init-db  --don't do this if you are using the included db.
+
+In browser open one of the following URLs
+http://127.0.0.1:5000/topic/corpus
+http://127.0.0.1:5000/topic/topic_main
 ```
+
+Note: the ip may be different on your system, check the output of `flask run --eager-loading`
+for the ip.
+
 
 # Project Layout
 
@@ -88,10 +96,11 @@ written in Python, so installation and integration with the server is straightfo
 
 The example app contains data cleaning, topic modeling, and storage functions that can be
 re-used by any Flask app. However, much of the code is currently tied to the specific dataset used
-by the example app, a corpus of cooking recipes from `food.com`. Future work could focus on
-decoupling the strings and keywords specific to the `food.com` dataset from the generic 
+by the example app, a corpus of cooking recipes from `food.com`. There was not enough time to both
+implement the web frontend and make the topic modeling backend generic.
+Future work could focus on decoupling the strings and keywords specific to the `food.com` dataset from the generic 
 topic modeling and storage functions. The generic code can be factored out into a
-Flask plugin. Currently the demo app act as a proof of concept rather than a fully independent
+Flask plugin. Currently the demo app acts as a proof of concept rather than a fully independent
 plugin.
 
 The proof-of-concept app ingests a corpus of [cooking recipe data](https://www.kaggle.com/shuyangli94/food-com-recipes-and-user-interactions?select=RAW_recipes.csv) retrieved from Kaggle. The raw data contains
@@ -121,7 +130,14 @@ known topics.
 # 2) Architecture & Key Functions
 ### 2) Documentation of how the software is implemented with sufficient detail so that others can have a basic understanding of your code for future extension or any further improvement.
 
+### Web Server
+
+#### server/app/flask_app.py
+
 ### Data Ingest and Cleaning
+
+#### server/app/csv_ingest.py
+#### server/app/db.py
 
 <br/><br/>
 
