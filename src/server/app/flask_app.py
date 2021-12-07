@@ -11,7 +11,6 @@ def DoDbSetup(app):
 
 def create_app(test_config=None):
     # create and configure the app
-    #app = Flask(__name__, instance_path='/path/to/instance/folder', instance_relative_config=True)
     app = Flask(__name__, instance_relative_config=True)
     print(f"Instance path is `{app.instance_path}`")
     print(f"__name__ path is `{__name__}`")

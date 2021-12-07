@@ -1,4 +1,5 @@
-# Schema
+# Schema from schema.sql
+#
 # CREATE TABLE corpus (
 #   id INTEGER PRIMARY KEY AUTOINCREMENT,
 #   third_party_id INTEGER UNIQUE NOT NULL, #id from the kaggle database
@@ -52,12 +53,6 @@ _INSERT_RAW_RECIPES_TAGS = '''
   VALUES (NULL, ?)
 '''
 
-# _INSERT_RAW_RECIPES_MODELS = '''
-#   INSERT INTO models (id, doc_id, third_party_id, tags, contributor_id, steps,
-#     description, ingredients, n_ingredients)
-#   VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)
-# '''
-
 _INSERT_RAW_RECIPES_MODELS = '''
   INSERT INTO models (id, doc_id, third_party_id, tags, contributor_id, steps,
     description, ingredients, n_ingredients)
@@ -99,6 +94,7 @@ _SELECT_ALL_TEXT_DATA = '''
   FROM corpus
   INNER JOIN models ON corpus.id=models.doc_id
 '''
+
 #WITH relevant_docs AS (
 #  WITH relevant_tags AS (
 #    SELECT tags.id FROM tags WHERE (tags.tag LIKE "%asia%") OR (tags.tag LIKE "%thai%")

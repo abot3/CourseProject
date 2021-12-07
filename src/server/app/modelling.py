@@ -9,7 +9,6 @@ from gensim.models.ldamulticore import LdaMulticore
 from gensim.parsing import preprocessing
 from gensim.corpora import Dictionary
 from flask import g
-# from nltk.stem.wordnet import WordNetLemmatizer
 from gensim.parsing.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 import logging
@@ -159,8 +158,6 @@ def build_gensim_corpus(
     # Convert document into the bag-of-words (BoW) format
     # = list of (token_id, token_count) tuples.
     corpus = [dictionary.doc2bow(doc) for doc in docs]
-    print('Number of unique tokens: %d' % len(dictionary))
-    print('Number of documents: %d' % len(corpus))
     return (corpus, dictionary)
 
 
@@ -175,7 +172,6 @@ def create_eta():
     corpus = g.corpus
     culture_match_ids = list()
     all_tokens = dictionary.token2id.keys()
-    # all_tokens.sort() 
     print("Dictionary is {}".format(g.dictionary))
     print("Dictionary repr is {}".format(repr(g.dictionary)))
     print("Dictionary token2id is {}".format(repr(g.dictionary.token2id)))
@@ -207,7 +203,6 @@ def compute_lda_model(df: pd.DataFrame, instance_path: str):
     try_save_dictionary(instance_path, dictionary)
     print_time()
     try_save_corpus(instance_path, corpus)
-    print("finished saving")
     print_time()
     g.dictionary = dictionary
     g.corpus = corpus
@@ -235,9 +230,6 @@ def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
     try:
         dictionary = try_get_saved_dictionary(instance_path)
         corpus = try_get_saved_corpus(instance_path)
-        if dictionary.get("chines") != None:
-            # print(f"Found chines in {dictionary.id2token["chines"]}")
-            print("Found chines in {}".format(dictionary.get("chines")))
         g.dictionary = dictionary
         g.corpus = corpus
     except IOError as e:

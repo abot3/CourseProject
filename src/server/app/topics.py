@@ -24,27 +24,7 @@ def yield_first_n(iterable):
 @bp.route('/topic/topic_main', methods=('GET', 'POST'))
 def topics_all():
     if request.method == 'POST':
-        # username = request.form['username']
-        # password = request.form['password']
-        # db = get_db()
         error = "Post not implemented for /topic_main"
-
-        # if not username:
-        #     error = 'Username is required.'
-        # elif not password:
-        #     error = 'Password is required.'
-
-        # if error is None:
-        #     try:
-        #         db.execute(
-        #             "INSERT INTO user (username, password) VALUES (?, ?)",
-        #             (username, generate_password_hash(password)),
-        #         )
-        #         db.commit()
-        #     except db.IntegrityError:
-        #         error = f"User {username} is already registered."
-        #     else:
-        #         return redirect(url_for("auth.login"))
         flash(error)
 
     df = read_text() 
@@ -66,8 +46,6 @@ def topics_all():
         print("Dictionary token2id l:{} {}".format(
             len(g.dictionary.token2id), yield_first_n(g.dictionary.token2id)))
         print("Dictionary token2id keys {}".format(yield_first_n(g.dictionary.token2id.keys())))
-    # if g.corpus:
-    #     print("Top topics {}".format(topic_model.top_topics(corpus=g.corpus)))
 
     return render_template('topic/topic_main.html', df=df, topic_model=topic_model,
         topics=topic_model.print_topics(num_topics=modelling._NUM_TOPICS, num_words=20))
@@ -83,7 +61,6 @@ def corpus_main():
     df["all_text"] = (df["document_name"] + df["description"] + df["steps"] +
                       df["tags"])
                       # df["ingredients"])
-    print("topic_main df {}".format(df))
     topic_model = modelling.run_topic_model(df, app.instance_path)
     print("Successfully ran topic model!")
     print("topic_model {}".format(topic_model))

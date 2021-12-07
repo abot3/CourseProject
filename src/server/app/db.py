@@ -88,11 +88,7 @@ def read_random_doc_text_to_dataframe(nrows=10):
 
 def insert_data_into_db(pp_recipes_df, raw_recipes_df):
     db = get_db()
-    # TODO(abot) - could use PANDAS direct to sql method here.
-    # raw_recipes_df.to_sql('corpus', db, if_exists='append',
-    #   index=True, index_label='id', schema=schema
     cur = db.cursor()
-    # list(data_set.itertuples(index=False))
     no_description = raw_recipes_df[(raw_recipes_df["description"] == "")
                                     | raw_recipes_df["description"].isnull()]
     no_name = raw_recipes_df[(raw_recipes_df["name"] == "")
@@ -114,7 +110,6 @@ def insert_data_into_db(pp_recipes_df, raw_recipes_df):
     raw_recipes_df.loc[no_steps.index, "steps"] = "no steps"
     raw_recipes_df.drop_duplicates("name", keep="first", inplace=True)
     raw_recipes_df.reset_index(inplace=True)
-    # rows = raw_recipes_df.loc[raw_recipes_df["name"] != "NaN", ["id", "name", "description"]]
     rows = raw_recipes_df.loc[:, ["id", "name", "description"]]
     duplicated_names = raw_recipes_df.loc[raw_recipes_df["name"].duplicated(),
                                           ["id", "name", "description"]]
@@ -123,17 +118,11 @@ def insert_data_into_db(pp_recipes_df, raw_recipes_df):
     assert (duplicated_ids.empty)
     print("duplicated_names {}".format(duplicated_names))
     print("duplicated ids {}".format(duplicated_ids))
-    print("3 bean salads {}".format(
-        raw_recipes_df[raw_recipes_df["name"] == "3 bean salad"]))
     print("tags datatype as df {}\n{}".format(raw_recipes_df["tags"].dtypes,
                                               raw_recipes_df["tags"]))
     tags = raw_recipes_df["tags"].str.split(',')
     tags = tags.explode().str.strip('[]" \'\'.,')
     tags.drop_duplicates(keep="first", inplace=True)
-    # print("type {} shape:{} tags as numpy\n {}".format(type(tags.to_numpy()),
-    #                                                    tags.to_numpy().shape,
-    #                                                    tags.to_numpy()))
-    # print("to be inserted {}".format([(x,) for x in tags.to_numpy(dtype=str).tolist()]))
     cur.executemany(sql_strings._INSERT_RAW_RECIPES_TAGS,
                     [(x, ) for x in tags.to_numpy(dtype=str).tolist()])
     db.commit()
@@ -163,7 +152,6 @@ def insert_data_into_db(pp_recipes_df, raw_recipes_df):
     db.commit()
     cur.execute(sql_strings._INSERT_DOC_TAGS)
     db.commit()
-    # cur.executemany(sq_string._INSERT_RAW_RECIPES_MODELS, rows)
 
     # Readback the insertion results.
     do_readback()

@@ -7,17 +7,6 @@
 {% block content %}
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script type=text/javascript>
-    //$(function() {
-      //$('a#test').on('click', function(e) {
-        //e.preventDefault()
-        //$.getJSON('/background_fetch_corpus_data',
-            //function(data) {
-          ////do nothing
-        //});
-        //return false;
-      //});
-    //});
-
     const listen_for_corpus_data = event => {
       const corpusDiv = document.getElementById('corpus_div');
       for (child in corpusDiv.childNodes) {
@@ -32,7 +21,6 @@
         console.log(`response data ${response_data[0]}`)
         corpusDiv.rem
         $.each(response_data, function(index, doc){
-          console.log("Successfully requested JSON data")
           console.log(`response data ${doc}`)
           const p = document.createElement('p');
           p.innerHTML = `</br><strong>Name:</strong> ${doc.document_name}\n` +
@@ -63,7 +51,6 @@
   </p>
   <h2>Corpus Sample</h2>
   <div id="corpus_div">
-    <button type="button" onclick="alert('Hello world!')">Click Me!</button>
     <button onclick="listen_for_corpus_data()" id="button">Display random corpus data</button>
   </div>
 {% endblock %}
