@@ -72,20 +72,28 @@ def read_all_doc_text_to_dataframe():
 
 # Limit -1 fetches all rows.
 def read_all_cuisine_doc_text_to_dataframe(limit=-1):
-  db = get_db()
-  if limit == -1:
-    df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, index_col=None)
-  else:
-    df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, params=[limit], index_col=None)
+    db = get_db()
+    if limit == -1:
+        df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA,
+                         db,
+                         index_col=None)
+    else:
+        df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA,
+                         db,
+                         params=[limit],
+                         index_col=None)
 
-  print("read_all_cuisine_doc_text_to_dataframe columns {}\n{}".format(
-      df.columns, df))
-  return df
+    print("read_all_cuisine_doc_text_to_dataframe columns {}\n{}".format(
+        df.columns, df))
+    return df
 
 
 def read_random_doc_text_to_dataframe(nrows=10):
     db = get_db()
-    df = pd.read_sql(sql_strings._SELECT_RANDOM_TEXT_DATA, db, params=[nrows], index_col=None)
+    df = pd.read_sql(sql_strings._SELECT_RANDOM_TEXT_DATA,
+                     db,
+                     params=[nrows],
+                     index_col=None)
     print("read_random_doc_text_to_dataframe columns {}\n{}".format(
         df.columns, df))
     return df

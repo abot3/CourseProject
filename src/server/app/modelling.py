@@ -12,6 +12,7 @@ from flask import g
 from gensim.parsing.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 import logging
+
 logging.basicConfig(filename='gensim.log',
                     format="%(asctime)s:%(levelname)s:%(message)s",
                     level=logging.INFO)
@@ -39,20 +40,44 @@ _DF_ROW_FRACTION = 1.0
 # _LDA_KEYWORD_PRIORS.
 _PRIOR_PROBABILITY = 0.2
 _LDA_KEYWORD_PRIORS = [
-    "chines", "korea", "korean",
-    "viet", "vietnames", "vietnam", "singapore",
+    "chines",
+    "korea",
+    "korean",
+    "viet",
+    "vietnames",
+    "vietnam",
+    "singapore",
     "singaporean",
-    "italy", "italian", "italyi",
-    "european", "french",
-    "mexican", "mexico",
-    "france", "british",
-    "britain", "mediterranean",
-    "africa", "african", "kenya", "kenyan"
-    "israel", "israeli", "middle-east", "middleeast",
-    "india", "halal",
-    "arab", "arabian", "egyptian", "egypt",
-    "japan", "japanese", "german",
-    "american", "america",
+    "italy",
+    "italian",
+    "italyi",
+    "european",
+    "french",
+    "mexican",
+    "mexico",
+    "france",
+    "british",
+    "britain",
+    "mediterranean",
+    "africa",
+    "african",
+    "kenya",
+    "kenyan"
+    "israel",
+    "israeli",
+    "middle-east",
+    "middleeast",
+    "india",
+    "halal",
+    "arab",
+    "arabian",
+    "egyptian",
+    "egypt",
+    "japan",
+    "japanese",
+    "german",
+    "american",
+    "america",
 ]
 
 
@@ -103,7 +128,7 @@ def try_get_saved_dictionary(instance_path: str) -> Optional[Dictionary]:
         dictionary = Dictionary.load(path)
     except Exception as e:
         pass
-    return dictionary 
+    return dictionary
 
 
 def try_save_dictionary(instance_path: str, dictionary: Dictionary):
@@ -122,7 +147,8 @@ def try_save_dictionary(instance_path: str, dictionary: Dictionary):
     dictionary.save(path)
 
 
-def try_get_saved_corpus(instance_path: str) -> Optional[List[Tuple[int, int]]]:
+def try_get_saved_corpus(
+        instance_path: str) -> Optional[List[Tuple[int, int]]]:
     '''If path exists deserialize the corpus of text documents from disk.
 
     Querying the SQL databse and re-cleaning the document text takes about
@@ -138,7 +164,7 @@ def try_get_saved_corpus(instance_path: str) -> Optional[List[Tuple[int, int]]]:
             corpus = pickle.load(input)
     except Exception as e:
         pass
-    return corpus 
+    return corpus
 
 
 def try_save_corpus(instance_path: str, corpus: List[Tuple[int, int]]):
@@ -237,9 +263,11 @@ def create_eta():
     print("Dictionary is {}".format(g.dictionary))
     print("Dictionary repr is {}".format(repr(g.dictionary)))
     print("Dictionary token2id is {}".format(repr(g.dictionary.token2id)))
-    print("korea in Dictionary token2id is {}".format(g.dictionary.token2id["korea"]))
+    print("korea in Dictionary token2id is {}".format(
+        g.dictionary.token2id["korea"]))
     for culture in _LDA_KEYWORD_PRIORS:
-        print("Searching for {}, in {}".format(culture, dictionary.token2id.get(culture, "<blank>")))
+        print("Searching for {}, in {}".format(
+            culture, dictionary.token2id.get(culture, "<blank>")))
         if culture in dictionary.token2id:
             print(f"Found culture {culture} in tokens")
             culture_match_ids.append((culture, dictionary.token2id[culture]))
@@ -274,15 +302,16 @@ def compute_lda_model(df: pd.DataFrame, instance_path: str):
     g.dictionary = dictionary
     g.corpus = corpus
     eta = create_eta()
-    model = LdaMulticore(corpus,
-                        workers=_NUM_WORKDERS,
-                         id2word=dictionary.id2token,
-                         # eta='auto',
-                         eta=eta,
-                         num_topics=_NUM_TOPICS,
-                         passes=_NUM_PASSES,
-                         iterations=_NUM_ITERATIONS,
-                         eval_every=_EVAL_EVERY)
+    model = LdaMulticore(
+        corpus,
+        workers=_NUM_WORKDERS,
+        id2word=dictionary.id2token,
+        # eta='auto',
+        eta=eta,
+        num_topics=_NUM_TOPICS,
+        passes=_NUM_PASSES,
+        iterations=_NUM_ITERATIONS,
+        eval_every=_EVAL_EVERY)
     print_time()
     return model
 
@@ -304,12 +333,14 @@ def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
 
     try:
         model = try_get_saved_model(instance_path)
-        print("Model topics {}".format(model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
+        print("Model topics {}".format(
+            model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
         return model
     except IOError as e:
         pass
 
     model = compute_lda_model(df, instance_path)
-    print("Model topics {}".format(model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
+    print("Model topics {}".format(
+        model.print_topics(num_topics=_NUM_TOPICS, num_words=20)))
     try_save_model(instance_path, model)
     return model
