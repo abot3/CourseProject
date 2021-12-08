@@ -36,23 +36,23 @@ def do_readback():
     db = get_db()
     cur = db.cursor()
     cur.execute("""
-    SELECT *
-    FROM
-      corpus AS c
-    ORDER BY
-      c.id
-    LIMIT 20;
+      SELECT *
+      FROM
+        corpus AS c
+      ORDER BY
+        c.id
+      LIMIT 20;
     """)
     for row in cur.fetchall():
         print(row)
 
     cur.execute("""
-    SELECT *
-    FROM
-      tags AS t
-    ORDER BY
-      t.id
-    LIMIT 20;
+      SELECT *
+      FROM
+        tags AS t
+      ORDER BY
+        t.id
+      LIMIT 20;
     """)
 
     for row in cur.fetchall():
@@ -73,7 +73,11 @@ def read_all_doc_text_to_dataframe():
 # Limit -1 fetches all rows.
 def read_all_cuisine_doc_text_to_dataframe(limit=-1):
   db = get_db()
-  df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, params=[limit], index_col=None)
+  if limit == -1:
+    df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, index_col=None)
+  else:
+    df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA, db, params=[limit], index_col=None)
+
   print("read_all_cuisine_doc_text_to_dataframe columns {}\n{}".format(
       df.columns, df))
   return df

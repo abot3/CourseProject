@@ -12,6 +12,13 @@ def convert_bp_encoded_fields(value: str) -> List[int]:
 
 
 def IngestPpData(path: str) -> pandas.DataFrame:
+    '''Read the pre-processed .csv file containing recipe data
+
+    Pre-processed data is deprecated.
+    The data is pre-tokenized using the BertTokenizer. This is less
+    efficient than just using the raw text .csv.
+    '''
+
     # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     tokenizer = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
     pp_recipes_df = pandas.read_csv(path,
@@ -26,13 +33,11 @@ def IngestPpData(path: str) -> pandas.DataFrame:
     print("PP Recipes DF\n{}\n{}".format(pp_recipes_df.columns, pp_recipes_df))
     print("PP Recipes DF name_tokens {}".format(
         pp_recipes_df['name_tokens'].iloc[:10].values.flatten().tolist()))
-    # print("PP Recipes DF name_tokens2 {} {}".format(type(pp_recipes_df['name_tokens'].iloc[0]), pp_recipes_df['name_tokens'].iloc[0]))
     test = [
         tokenizer.decode(x)
         for x in pp_recipes_df['name_tokens'].iloc[:20].values
     ]
     print("Tokenizer output{}".format(test))
-    # pp_recipes_df['name_tokens', 'ingredient_tokens', 'steps_tokens'].apply(tokenizer.decode(x))
     pp_recipes_df['name_tokens'] = pp_recipes_df['name_tokens'].apply(
         tokenizer.decode)
     pp_recipes_df.sort_values(['name_tokens'], inplace=True)
@@ -44,6 +49,12 @@ def IngestPpData(path: str) -> pandas.DataFrame:
 
 
 def IngestRawData(path: str) -> pandas.DataFrame:
+    '''Read the .csv file containing recipe data from food.com.
+
+    Data is returned as a pandas dataframe. Key columns are
+    name, description, steps, tags, ingredients.
+    '''
+
     raw_recipes_df = pandas.read_csv(path)
     raw_recipes_df.sort_values(['name'], inplace=True)
     print("RAW Recipes DF name {} {}".format(

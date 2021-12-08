@@ -124,6 +124,41 @@ _SELECT_ALL_CUISINE_TEXT_DATA = '''
       OR (tags.tag LIKE "%viet%") OR (tags.tag LIKE "%singapore%")
       OR (tags.tag LIKE "%italy%") OR (tags.tag LIKE "%italian%")
       OR (tags.tag LIKE "%european%") OR (tags.tag LIKE "%french%")
+      OR (tags.tag LIKE "%mexican%") OR (tags.tag LIKE "%mexic%")
+      OR (tags.tag LIKE "%france%") OR (tags.tag LIKE "%british%")
+      OR (tags.tag LIKE "%britain%") OR (tags.tag LIKE "%mediterranean%")
+      OR (tags.tag LIKE "%africa%") OR (tags.tag LIKE "%kenya%")
+      OR (tags.tag LIKE "%israel%") OR (tags.tag LIKE "%middle-e%")
+      OR (tags.tag LIKE "%india%") OR (tags.tag LIKE "%halal%")
+      OR (tags.tag LIKE "%arab%") OR (tags.tag LIKE "%egyptian%")
+      OR (tags.tag LIKE "%japan%") OR (tags.tag LIKE "%german%")
+      --OR (tags.tag LIKE "%american%")
+    )
+    SELECT doc_tags.doc_id
+    FROM doc_tags
+    INNER JOIN relevant_tags ON doc_tags.tag_id=relevant_tags.id
+  )
+  SELECT 
+    corpus.document_name,
+    models.description,
+    models.tags,
+    models.steps,
+    models.ingredients,
+    models.third_party_id
+  FROM corpus
+  INNER JOIN relevant_docs ON corpus.id=relevant_docs.doc_id
+  INNER JOIN models ON corpus.id=models.doc_id
+'''
+
+_SELECT_ALL_CUISINE_TEXT_DATA_WITH_LIMIT = '''
+  WITH relevant_docs AS (
+    WITH relevant_tags AS (
+      SELECT tags.id FROM tags WHERE (tags.tag LIKE "%asia%") OR (tags.tag LIKE "%thai%")
+      OR (tags.tag LIKE "%chinese%")  OR (tags.tag LIKE "%korea%")
+      OR (tags.tag LIKE "%viet%") OR (tags.tag LIKE "%singapore%")
+      OR (tags.tag LIKE "%italy%") OR (tags.tag LIKE "%italian%")
+      OR (tags.tag LIKE "%european%") OR (tags.tag LIKE "%french%")
+      OR (tags.tag LIKE "%mexican%") OR (tags.tag LIKE "%mexic%")
       OR (tags.tag LIKE "%france%") OR (tags.tag LIKE "%british%")
       OR (tags.tag LIKE "%britain%") OR (tags.tag LIKE "%mediterranean%")
       OR (tags.tag LIKE "%africa%") OR (tags.tag LIKE "%kenya%")

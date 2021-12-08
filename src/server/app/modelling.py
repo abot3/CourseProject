@@ -16,27 +16,35 @@ logging.basicConfig(filename='gensim.log',
                     format="%(asctime)s:%(levelname)s:%(message)s",
                     level=logging.INFO)
 
-
+# Output filenames. Used to cache corpus and model on disk.
 _MODEL_NAME = "lda_model.model"
 _DICTIONARY_NAME = "dictionary.corpus"
 _CORPUS_NAME = "corpus.corpus"
+# Number of topics to generate via the topic model.
 _NUM_TOPICS = 30
-_NUM_WORKDERS = 3
+# Max iterations and epochs to run the topic model.
 _NUM_PASSES = 10
 _NUM_ITERATIONS = 100
 _EVAL_EVERY = 1
+# Number of parallel processes used when generating topic model
+_NUM_WORKDERS = 3
+# Max number of docs to hold in memory per worker.
 _DOC_CHUNKSIZE = 2000
+# % of docs from corpus used to generate topic model.
+# Lowing this number decreses runtime significantly.
 _DF_ROW_FRACTION = 1.0
-_PROR_PROBABILITY = 0.2  #reserve 20% probability for our priors
-
-
-
-_CULTURES = [
+# All Latent Dirichlet Allocation prior probabilities must sum
+# to 1. Reserve 20% probability for key words corresponding to
+# the user's desired topics. A list of keywords is stored in
+# _LDA_KEYWORD_PRIORS.
+_PRIOR_PROBABILITY = 0.2
+_LDA_KEYWORD_PRIORS = [
     "chines", "korea", "korean",
     "viet", "vietnames", "vietnam", "singapore",
     "singaporean",
     "italy", "italian", "italyi",
     "european", "french",
+    "mexican", "mexico",
     "france", "british",
     "britain", "mediterranean",
     "africa", "african", "kenya", "kenyan"
@@ -49,6 +57,11 @@ _CULTURES = [
 
 
 def try_get_saved_model(instance_path: str) -> Optional[LdaMulticore]:
+    '''If path exists deserialize the model from disk to memory.
+
+    Model generation can take minutes. Saving the model to disk and
+    reading it back when required is much faster than regenerating.
+    '''
     model = None
     path = os.path.join(instance_path, _MODEL_NAME)
     if not os.path.exists(path):
@@ -61,6 +74,11 @@ def try_get_saved_model(instance_path: str) -> Optional[LdaMulticore]:
 
 
 def try_save_model(instance_path: str, model: LdaMulticore):
+    '''If path exists serialize the model to a file on disk.
+
+    Model generation can take minutes. Saving the model to disk and
+    reading it back when required is much faster than regenerating.
+    '''
     path = os.path.join(instance_path, _MODEL_NAME)
     print("saving to {}".format(path))
     if not model:
@@ -71,6 +89,12 @@ def try_save_model(instance_path: str, model: LdaMulticore):
 
 
 def try_get_saved_dictionary(instance_path: str) -> Optional[Dictionary]:
+    '''If path exists deserialize the tokenized bag-of-words dictionary from disk.
+
+    Tokenizing, stemming, and storing the dictionary is much slower than
+    loading it from disk.
+    Uses the pickle module for serialization.
+    '''
     model = None
     path = os.path.join(instance_path, _DICTIONARY_NAME)
     if not os.path.exists(path):
@@ -83,6 +107,12 @@ def try_get_saved_dictionary(instance_path: str) -> Optional[Dictionary]:
 
 
 def try_save_dictionary(instance_path: str, dictionary: Dictionary):
+    '''If path exists serialize the tokenized bag-of-words dictionary to disk.
+
+    Tokenizing, stemming, and storing the dictionary is much slower than
+    loading it from disk.
+    Uses the pickle module for serialization
+    '''
     path = os.path.join(instance_path, _DICTIONARY_NAME)
     print("saving dictionary to {}".format(path))
     if not dictionary:
@@ -93,6 +123,12 @@ def try_save_dictionary(instance_path: str, dictionary: Dictionary):
 
 
 def try_get_saved_corpus(instance_path: str) -> Optional[List[Tuple[int, int]]]:
+    '''If path exists deserialize the corpus of text documents from disk.
+
+    Querying the SQL databse and re-cleaning the document text takes about
+    as long as just deserializing the existing corpus from disk.
+    Uses the pickle module for serialization.
+    '''
     corpus = None
     path = os.path.join(instance_path, _CORPUS_NAME)
     if not os.path.exists(path):
@@ -106,6 +142,12 @@ def try_get_saved_corpus(instance_path: str) -> Optional[List[Tuple[int, int]]]:
 
 
 def try_save_corpus(instance_path: str, corpus: List[Tuple[int, int]]):
+    '''If path exists deserialize the corpus of text documents from disk.
+
+    Querying the SQL databse and re-cleaning the document text takes about
+    as long as just deserializing the existing corpus from disk.
+    Uses the pickle module for serialization.
+    '''
     path = os.path.join(instance_path, _CORPUS_NAME)
     print("saving corpus to {}".format(path))
     if not corpus:
@@ -119,12 +161,18 @@ def try_save_corpus(instance_path: str, corpus: List[Tuple[int, int]]):
 def build_gensim_corpus(
         df: pd.DataFrame) -> Tuple[List[Tuple[int, int]], Dictionary]:
     docs = df["all_text"].sample(frac=_DF_ROW_FRACTION).to_numpy()
+    '''Build a bag-of-words representation of the corpus. 
+
+    Remove numerics, and invalid characters, tokenize, and stem the words
+    in the corpus.
+    Remove any stopwords from the text.
+    Remove any tokens that occur in > 40% of documents.
+    '''
 
     # Split the documents into tokens.
     tokenizer = RegexpTokenizer(r'\w+')
     p = PorterStemmer()
     for idx in range(len(docs)):
-        docs[idx] = preprocessing.remove_stopwords(docs[idx])
         docs[idx] = preprocessing.preprocess_string(
             docs[idx],
             filters=[
@@ -134,6 +182,7 @@ def build_gensim_corpus(
             ])
         docs[idx] = ' '.join(docs[idx])
         docs[idx] = docs[idx].lower()  # Convert to lowercase.
+        docs[idx] = preprocessing.remove_stopwords(docs[idx])
         docs[idx] = p.stem_sentence(docs[idx])
         docs[idx] = tokenizer.tokenize(docs[idx])  # Split into words.
 
@@ -151,7 +200,7 @@ def build_gensim_corpus(
     # Create a dictionary representation of the documents.
     dictionary = Dictionary(docs)
     print("docs\n{}".format(docs[1:20]))
-    # Filter out words that occur less than 20 documents, or more than 50% of the documents.
+    # Filter out words that occur less than 0 documents, or more than 40% of the documents.
     dictionary.filter_extremes(no_below=0, no_above=0.4)
 
     # Bag-of-words representation of the documents.
@@ -166,8 +215,21 @@ def print_time():
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
 
+
 def create_eta():
-    global _CULTURES
+    '''Create numpy array of dirichlet priors.
+
+    Where N is the number of unique tokens in the corpus. Create a
+    numpy array with length N. Each entry corresponds to the Dirichlet
+    prior for a single word. Set the probability of each word to 1/N
+    initially.
+
+    For key words that correspond to topics of interest increase the
+    probability to be > 1/N while keeping sum(ARR) = 1.0.
+
+    Returns the modified numpy array
+    '''
+    global _LDA_KEYWORD_PRIORS
     dictionary = g.dictionary
     corpus = g.corpus
     culture_match_ids = list()
@@ -176,7 +238,7 @@ def create_eta():
     print("Dictionary repr is {}".format(repr(g.dictionary)))
     print("Dictionary token2id is {}".format(repr(g.dictionary.token2id)))
     print("korea in Dictionary token2id is {}".format(g.dictionary.token2id["korea"]))
-    for culture in _CULTURES:
+    for culture in _LDA_KEYWORD_PRIORS:
         print("Searching for {}, in {}".format(culture, dictionary.token2id.get(culture, "<blank>")))
         if culture in dictionary.token2id:
             print(f"Found culture {culture} in tokens")
@@ -185,15 +247,20 @@ def create_eta():
     n_culture_tokens = len(culture_match_ids)
     n_normal_tokens = n_tokens - n_culture_tokens
     print(f"{n_tokens}, {n_culture_tokens}, {n_normal_tokens}")
-    per_token_probability = (1.0 - _PROR_PROBABILITY) / n_normal_tokens
-    culture_token_probability = (_PROR_PROBABILITY) / n_culture_tokens
+    per_token_probability = (1.0 - _PRIOR_PROBABILITY) / n_normal_tokens
+    culture_token_probability = (_PRIOR_PROBABILITY) / n_culture_tokens
     eta = list(np.full(n_tokens, per_token_probability))
     for culture in culture_match_ids:
         eta[culture[1]] = culture_token_probability
     return eta
 
+
 def compute_lda_model(df: pd.DataFrame, instance_path: str):
-    print("Building corpus")
+    '''Load the corpus and bag-of-words dictionary from disk. Compute topic model.
+
+    Returns the top 20 words and _NUM_TOPICS most significant topics discovered
+    by the topic modeling algorithm.
+    '''
     print_time()
     corpus, dictionary = build_gensim_corpus(df)
     # https://stackoverflow.com/questions/67229373/gensim-lda-error-cannot-compute-lda-over-an-empty-collection-no-terms
@@ -220,12 +287,12 @@ def compute_lda_model(df: pd.DataFrame, instance_path: str):
     return model
 
 
-# def set_topic_model_corpus_fraction(fraction):
-#     global _DF_ROW_FRACTION
-#     _DF_ROW_FRACTION = fraction
-
-
 def run_topic_model(df: pd.DataFrame, instance_path: str) -> LdaMulticore:
+    '''Return top _NUM_TOPICS topcs in the corpus using and LDA model.
+
+    Main method for the generating topics used by the `/topic/corpus`
+    view.
+    '''
     model = None
     try:
         dictionary = try_get_saved_dictionary(instance_path)

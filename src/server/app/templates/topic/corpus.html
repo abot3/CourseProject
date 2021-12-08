@@ -7,6 +7,9 @@
 {% block content %}
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script type=text/javascript>
+    // Called in the background (via AJAX) from the `/topic/topic_main` page
+    // whenever the user clicks the button requesting a random sample
+    // of documents from the corpus.
     const listen_for_corpus_data = event => {
       const corpusDiv = document.getElementById('corpus_div');
       Array.prototype.forEach.call (corpusDiv.childNodes, function (child) {

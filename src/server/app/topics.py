@@ -13,9 +13,7 @@ bp = Blueprint('topics', __name__, url_prefix='/')
 
 def read_text(limit=-1):
     # df = db.read_all_doc_text_to_dataframe()
-    # modelling.set_topic_model_corpus_fraction(.10)
     df = db.read_all_cuisine_doc_text_to_dataframe(limit)
-    # modelling.set_topic_model_corpus_fraction(1.0)
     return df
 
 def yield_first_n(iterable):
@@ -23,6 +21,12 @@ def yield_first_n(iterable):
 
 @bp.route('/topic/topic_main', methods=('GET', 'POST'))
 def topics_all():
+    '''Render a page listing all topics found in the corpus.
+
+    Shows the top 30 topics in the corpus, and the 20 most 
+    highly weighted words for each topic. Topics are generated
+    by modelling.run_topic_model().
+    '''
     if request.method == 'POST':
         error = "Post not implemented for /topic_main"
         flash(error)
@@ -36,10 +40,6 @@ def topics_all():
     print("Successfully ran topic model!")
     print("topic_model {}".format(topic_model))
     if g.dictionary:
-        # Potentially use eta: https://towardsdatascience.com/evaluate-topic-model-in-python-latent-dirichlet-allocation-lda-7d57484bb5d0.
-        # keys is - list of integers
-        # values is ValuesView? 
-        # Token2id keys are words.
         print("Dictionary keys l:{} {}\n Dictionary values l:{} {}\n".format(
             len(g.dictionary.keys()), yield_first_n(g.dictionary.keys()),
             len(g.dictionary.values()), yield_first_n(g.dictionary.values())))
@@ -53,6 +53,9 @@ def topics_all():
 
 @bp.route('/topic/corpus', methods=('GET', 'POST'))
 def corpus_main():
+    '''Render a page displaying a sample of 20 random documents from
+    the corpus.
+    '''
     if request.method == 'POST':
         error = "Post not implemented for /corpus"
         flash(error)
@@ -76,6 +79,11 @@ def corpus_main():
 
 @bp.route('/topic/background_fetch_corpus_data', methods=('GET',))
 def background_fetch_corpus_data():
+    '''Fetch a new set of 20 random documents from the corpus. 
+
+    The `/topic/corpus` page is re-rendered with the new documents.
+    The documents are returned as a serialized JSON payload.
+    '''
     n_docs = request.args.get("n_docs", default=20)
     print(f"requesting {n_docs} docs")
     df = db.read_random_doc_text_to_dataframe(nrows=n_docs)
