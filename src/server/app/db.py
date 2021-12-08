@@ -12,6 +12,8 @@ from . import sql_strings
 
 
 def get_db():
+    '''Get sqlite3 databse connection object.
+    '''
     if 'db' not in g:
         g.db = sqlite3.connect(current_app.config['DATABASE'],
                                detect_types=sqlite3.PARSE_DECLTYPES)
@@ -21,39 +23,45 @@ def get_db():
 
 
 def close_db(e=None):
+    '''Close a sqlite3 databse connection object.
+    '''
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
 def init_db():
+    '''Create SQL tables from stored schema
+    '''
     db = get_db()
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
 
 def do_readback():
+    '''Readback rows from SQL tables to check schema.
+  '''
     db = get_db()
     cur = db.cursor()
     cur.execute("""
-      SELECT *
-      FROM
-        corpus AS c
-      ORDER BY
-        c.id
-      LIMIT 20;
-    """)
+    SELECT *
+    FROM
+      corpus AS c
+    ORDER BY
+      c.id
+    LIMIT 20;
+  """)
     for row in cur.fetchall():
         print(row)
 
     cur.execute("""
-      SELECT *
-      FROM
-        tags AS t
-      ORDER BY
-        t.id
-      LIMIT 20;
-    """)
+    SELECT *
+    FROM
+      tags AS t
+    ORDER BY
+      t.id
+    LIMIT 20;
+  """)
 
     for row in cur.fetchall():
         keys = row.keys()
@@ -62,7 +70,11 @@ def do_readback():
         print("row: {}".format(r))
 
 
-def read_all_doc_text_to_dataframe():
+def read_all_doc_text_to_dataframe() -> pd.DataFrame:
+    '''Retreive corpus doc text from SQL tables.
+
+  Return a Pandas dataframe containing 1 row per document.
+  '''
     db = get_db()
     df = pd.read_sql(sql_strings._SELECT_ALL_TEXT_DATA, db, index_col=None)
     print("read_all_doc_text_to_dataframe columns {}\n{}".format(
@@ -71,14 +83,19 @@ def read_all_doc_text_to_dataframe():
 
 
 # Limit -1 fetches all rows.
-def read_all_cuisine_doc_text_to_dataframe(limit=-1):
+def read_all_cuisine_doc_text_to_dataframe(limit=-1) -> pd.DataFrame:
+    '''Retreive corpus doc text from SQL tables. Only return rows
+  containing keywords related to cuisines of interest.
+
+  Return a Pandas dataframe containing 1 row per document.
+  '''
     db = get_db()
     if limit == -1:
         df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA,
                          db,
                          index_col=None)
     else:
-        df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA,
+        df = pd.read_sql(sql_strings._SELECT_ALL_CUISINE_TEXT_DATA_WITH_LIMIT,
                          db,
                          params=[limit],
                          index_col=None)
@@ -88,7 +105,14 @@ def read_all_cuisine_doc_text_to_dataframe(limit=-1):
     return df
 
 
-def read_random_doc_text_to_dataframe(nrows=10):
+def read_random_doc_text_to_dataframe(nrows=10) -> pd.DataFrame:
+    '''Retreive corpus doc text from SQL tables.
+
+  Select random documents from corpus using SQL.
+  Limit the number of rows returned to nrows.
+
+  Return a Pandas dataframe containing 1 row per document.
+  '''
     db = get_db()
     df = pd.read_sql(sql_strings._SELECT_RANDOM_TEXT_DATA,
                      db,
@@ -99,7 +123,13 @@ def read_random_doc_text_to_dataframe(nrows=10):
     return df
 
 
-def insert_data_into_db(pp_recipes_df, raw_recipes_df):
+def insert_data_into_db(pp_recipes_df: pd.DataFrame,
+                        raw_recipes_df: pd.DataFrame):
+    '''Clean and store text documents in SQL DB.
+
+    Clean text fields in input dataframes. Each DataFrame row represents 1 doc.
+    One row is created in DB for each row in the input DataFrames.
+    '''
     db = get_db()
     cur = db.cursor()
     no_description = raw_recipes_df[(raw_recipes_df["description"] == "")
@@ -171,6 +201,8 @@ def insert_data_into_db(pp_recipes_df, raw_recipes_df):
 
 
 def remove_n_path_components(n, path):
+    '''Helper function to remove the last <n> elements from the file path.
+    '''
     num = 0
     while num < n:
         path = os.path.dirname(path)
@@ -181,7 +213,14 @@ def remove_n_path_components(n, path):
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
-    """Clear the existing data and create new tables."""
+    """Clear the existing data and create new tables.
+
+    The freshly created tables are filled with data from the .csv files.
+    The .csv files contain a list of ~230k recipes from food.com.
+
+    This function can be run from the command line via `flask init-db`. See
+    `click.command` for details.
+    """
     path = [x for x in remove_n_path_components(3, current_app.root_path)][-1]
     *_, path = remove_n_path_components(3, current_app.root_path)
     path = os.path.join(path, "data/archive")
@@ -195,5 +234,10 @@ def init_db_command():
 
 
 def init_app(app):
+    '''Called from flask_app.py.
+
+  Adds the command line flag `flask init-db` to the Flask app.
+  Adds a teardown callback that closes the DB connection.
+  '''
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
