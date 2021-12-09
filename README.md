@@ -339,11 +339,11 @@ Run the server:
 1. `cd server`
 2. `flask routes`
 3. `flask run --eager-loading`
-4. Optional: if there is no .sqlite file in `server/app/instance`, you can create the database with: `flask init-db`. Don't do this if you are using the included db, as guided in these instructions as this can take quite some time.
+4. Optional: if there is no .sqlite file in `src/server/instance`, you can create the database with: `flask init-db`. Don't do this if you are using the included db, as guided in these instructions as this can take quite some time.
 
 Additional details on the server set up: 
 * `flask routes` shows all the available urls. `flask init-db` doesn't run the webserver,
-it creates the .sqlite database under the `src/instance/*` folder. This needs to be done before running
+it creates the .sqlite database under the `src/server/instance/*` folder. This needs to be done before running
 the webserver *unless* the checked-in database is available. The database setup may run for a few
 minutes.
 * `flask run --eager-loading` will run the webserver. The first time opening the URLS, the topic and
