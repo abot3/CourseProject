@@ -43,6 +43,7 @@ _LDA_KEYWORD_PRIORS = [
     "chines",
     "korea",
     "korean",
+    "koreathi",
     "viet",
     "vietnames",
     "vietnam",
@@ -74,10 +75,11 @@ _LDA_KEYWORD_PRIORS = [
     "egyptian",
     "egypt",
     "japan",
+    "japanes",
     "japanese",
     "german",
-    "american",
-    "america",
+    # "american",
+    # "america",
 ]
 
 
@@ -263,8 +265,6 @@ def create_eta():
     print("Dictionary is {}".format(g.dictionary))
     print("Dictionary repr is {}".format(repr(g.dictionary)))
     print("Dictionary token2id is {}".format(repr(g.dictionary.token2id)))
-    print("korea in Dictionary token2id is {}".format(
-        g.dictionary.token2id["korea"]))
     for culture in _LDA_KEYWORD_PRIORS:
         print("Searching for {}, in {}".format(
             culture, dictionary.token2id.get(culture, "<blank>")))

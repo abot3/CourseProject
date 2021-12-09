@@ -120,7 +120,7 @@ _SELECT_ALL_CUISINE_TEXT_DATA = '''
   WITH relevant_docs AS (
     WITH relevant_tags AS (
       SELECT tags.id FROM tags WHERE (tags.tag LIKE "%asia%") OR (tags.tag LIKE "%thai%")
-      OR (tags.tag LIKE "%chinese%")  OR (tags.tag LIKE "%korea%")
+      OR (tags.tag LIKE "%chinese%") OR (tags.tag LIKE "%korea%")
       OR (tags.tag LIKE "%viet%") OR (tags.tag LIKE "%singapore%")
       OR (tags.tag LIKE "%italy%") OR (tags.tag LIKE "%italian%")
       OR (tags.tag LIKE "%european%") OR (tags.tag LIKE "%french%")

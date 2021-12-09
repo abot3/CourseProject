@@ -12,9 +12,13 @@ bp = Blueprint('topics', __name__, url_prefix='/')
 
 
 def read_text(limit=-1):
-    # df = db.read_all_doc_text_to_dataframe()
-    df = db.read_all_cuisine_doc_text_to_dataframe(limit)
-    return df
+  '''Retreive corpus doc text from SQL tables.
+
+  Limit controls the number of returned documents.
+  If limit == -1 all rows are returned.
+  '''
+  df = db.read_all_cuisine_doc_text_to_dataframe(limit)
+  return df
 
 
 def yield_first_n(iterable):
@@ -70,13 +74,13 @@ def corpus_main():
     df["all_text"] = (df["document_name"] + df["description"] + df["steps"] +
                       df["tags"])
     # df["ingredients"])
-    topic_model = modelling.run_topic_model(df, app.instance_path)
-    print("Successfully ran topic model!")
-    print("topic_model {}".format(topic_model))
+    # topic_model = modelling.run_topic_model(df, app.instance_path)
+    # print("Successfully ran topic model!")
+    # print("topic_model {}".format(topic_model))
     data = {
         "n_docs": df.shape[0],
         "avg_doc_length": "{:.2f}".format(df["all_text"].str.len().mean()),
-        "num_topics": topic_model.get_topics().shape[0],
+        # "num_topics": topic_model.get_topics().shape[0],
     }
 
     print("returning from corpus")

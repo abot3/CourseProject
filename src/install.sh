@@ -48,6 +48,7 @@ if [ $use_conda -eq 0 ]; then
   pip install spacy 
   pip install ftfy
   pip install nltk 
+  pip install spacy
 else
   conda install flask
   conda install gensim
@@ -61,7 +62,9 @@ else
   conda install spacy 
   conda install ftfy
   conda install nltk
+  conda install spacy
 fi
+echo "$Green Installation complete!"
 echo "$Red Please run the following commands:"
 echo "$Green export FLASK_APP=app/flask_app.py"
 echo "$Green export FLASK_ENV=development"
