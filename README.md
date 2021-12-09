@@ -9,6 +9,14 @@
 
 Please fork this repository and paste the github link of your fork on Microsoft CMT. Detailed instructions are on Coursera under Week 1: Course Project Overview/Week 9 Activities.
 
+## Note to Reviewers
+
+The project video and `app.sqlite` is available on Google Drive here:
+https://drive.google.com/drive/folders/17Mq_xarb6h1H-DZeqW3I513ew_QwB5fR?usp=sharing.
+
+Please copy the `app.sqlite` to `/CourseProject/src/server/instance/`. This will allow you
+to skip setting up the DB (`flask init-db`) which can take a few minutes.
+
 # 1) Overview <a name="overview"></a>
 
 As stated in the project proposal the purpose of this code is to provide an implementation
